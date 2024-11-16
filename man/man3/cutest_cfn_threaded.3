@@ -5,6 +5,19 @@ CUTEST_cfn_threaded \- CUTEst tool to evaluate function and constraints values.
 .SH SYNOPSIS
 .HP 1i
 CALL CUTEST_cfn_threaded( status, n, m, X, f, C, thread )
+
+.HP 1i
+For real rather than double precision arguments, instead
+
+.HP 1i
+CALL CUTEST_cfn_threaded_s( ... )
+
+.HP 1i
+and for quadruple precision arguments, when available,
+
+.HP 1i
+CALL CUTEST_cfn_threaded_q( ... )
+
 .SH DESCRIPTION
 The CUTEST_cfn_threaded subroutine evaluates the value of the objective
 function and

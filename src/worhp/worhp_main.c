@@ -1,3 +1,5 @@
+/* THIS VERSION: CUTEST 2.3 - 2024-10-11 AT 09:00 GMT */
+
 #ifndef THIS_PROBLEM_NAME
 #define THIS_PROBLEM_NAME "WORHP/CUTEst"
 #endif
@@ -10,6 +12,7 @@
 #define NDEBUG
 
 #include "cutest.h"
+#include "cutest_routines.h"
 #include "worhp.h"
 #include <assert.h>
 #include <math.h>
@@ -21,25 +24,25 @@
 /* Declare user functions, implementation later */
 /* Objective function */
 void UserF(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-           doublereal *g_val_dummy);
+           rp_ *g_val_dummy);
 /* Function of constraints */
 void UserG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-           doublereal *j_val, integer *j_var, integer *j_fun);
+           rp_ *j_val, integer *j_var, integer *j_fun);
 /* Objective function and function of constraints simultaneously */
 void UserF_G(OptVar *opt, Workspace *wsp, Params *par, Control *cnt);
 /* Gradient of objective function */
 void UserDF(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-            doublereal *g_val, integer *g_var);
+            rp_ *g_val, integer *g_var);
 /* Jacobian of constraints */
 void UserDG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-            doublereal *j_val, integer *j_var, integer *j_fun,
-            doublereal *c_dummy);
+            rp_ *j_val, integer *j_var, integer *j_fun,
+            rp_ *c_dummy);
 /* Gradient of objective function and Jacobian of constraints simultaneously */
 void UserDF_DG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-               doublereal *j_val, integer *j_var, integer *j_fun);
+               rp_ *j_val, integer *j_var, integer *j_fun);
 /* Hessian of Lagrangian */
 void UserHM(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-            doublereal *h_val, integer *h_row, integer *h_col,
+            rp_ *h_val, integer *h_row, integer *h_col,
             integer hm_nnz, integer hm_nnz_init, integer *hm_perm_inverse);
 
 
@@ -69,10 +72,10 @@ int MAINENTRY() {
     logical *equatn = NULL;
     logical *linear = NULL;
 
-    doublereal *j_val = NULL;
-    doublereal *h_val = NULL;
-    doublereal *g_val = NULL;
-    doublereal *c_dummy = NULL;
+    rp_ *j_val = NULL;
+    rp_ *h_val = NULL;
+    rp_ *g_val = NULL;
+    rp_ *c_dummy = NULL;
     integer *j_fun = NULL;
     integer *j_var = NULL;
     integer *h_row = NULL;
@@ -91,7 +94,8 @@ int MAINENTRY() {
     /* Adapt these as appropriate */
     const char cutest_problem[STRING_LENGTH] = THIS_PROBLEM_NAME;
     const char *outsdifd_filename = OUTSDIFD_FILENAME;
-    char buffer[STRING_LENGTH];
+    /* char buffer[STRING_LENGTH]; */
+    char buffer[STRING_LENGTH+20];
 
     /* Check Version of library and header files */
     CHECK_WORHP_VERSION
@@ -170,12 +174,12 @@ int MAINENTRY() {
         /* Constrained case */
         MALLOC(equatn, cutest_m, logical);
         MALLOC(linear, cutest_m, logical);
-        MALLOC(c_dummy, cutest_m, doublereal);
+        MALLOC(c_dummy, cutest_m, rp_);
 
         CUTEST_csetup(&cutest_status, &cutest_input, &out, &io_buffer,
-                      &opt.n, &cutest_m, opt.X, opt.XL, opt.XU,
-                      opt.Mu, opt.GL, opt.GU, equatn, linear,
-                      &order_none, &order_none, &order_none);
+                        &opt.n, &cutest_m, opt.X, opt.XL, opt.XU,
+                        opt.Mu, opt.GL, opt.GU, equatn, linear,
+                        &order_none, &order_none, &order_none);
 #if (WORHP_MAJOR > 1 || WORHP_MINOR > 9)
         for (i = 0; i < opt.m; i += 1) {
             if (linear[i]) {
@@ -185,7 +189,7 @@ int MAINENTRY() {
 #endif
     } else {
         CUTEST_usetup(&cutest_status, &cutest_input, &out, &io_buffer,
-                      &opt.n, opt.X, opt.XL, opt.XU);
+                        &opt.n, opt.X, opt.XL, opt.XU);
     }
     FORTRAN_close(&cutest_input, &cutest_status);
 
@@ -194,10 +198,10 @@ int MAINENTRY() {
          * Initialise structure of gradient of objective function
          */
         MALLOC(g_var, opt.n, integer);
-        MALLOC(g_val, opt.n, doublereal);
+        MALLOC(g_val, opt.n, rp_);
 
         CUTEST_cofsg(&cutest_status, &opt.n, opt.X, &opt.F, &g_nnz, &opt.n,
-                     g_val, g_var, &evaluate_derivative);
+                       g_val, g_var, &evaluate_derivative);
 
         wsp.DF.nnz = g_nnz;
         wsp.DF.dim_perm = g_nnz;
@@ -227,12 +231,13 @@ int MAINENTRY() {
          * structure giving method. We misuse evaluation of the Jacobian to gain
          * the structure.
          */
-        MALLOC(j_val, jac_nnz_init, doublereal);
+        MALLOC(j_val, jac_nnz_init, rp_);
         MALLOC(j_var, jac_nnz_init, integer);
         MALLOC(j_fun, jac_nnz_init, integer);
 
-        CUTEST_ccfsg(&cutest_status, &opt.n, &cutest_m, opt.X, opt.G, &jac_nnz,
-                     &jac_nnz_init, j_val, j_var, j_fun, &evaluate_derivative);
+        CUTEST_ccfsg(&cutest_status, &opt.n, &cutest_m, opt.X, opt.G,
+                       &jac_nnz, &jac_nnz_init, j_val, j_var, j_fun,
+                       &evaluate_derivative);
         assert(jac_nnz + opt.n == jac_nnz_init);
         wsp.DG.nnz = jac_nnz;
         /* Initialise dimension of permutation vector for sorting */
@@ -265,7 +270,7 @@ int MAINENTRY() {
                        cutest_problem, par.NLPprint);
         }
         /* Allocate corresponding vectors for first initilization */
-        MALLOC(h_val, hm_nnz_init, doublereal);
+        MALLOC(h_val, hm_nnz_init, rp_);
         MALLOC(h_row, hm_nnz_init, integer);
         MALLOC(h_col, hm_nnz_init, integer);
 
@@ -274,10 +279,10 @@ int MAINENTRY() {
         /* by changing row and col. */
         if (opt.m > 0) {
             CUTEST_cshp(&cutest_status, &opt.n,
-                        &hm_nnz, &hm_nnz_init, h_col, h_row);
+                          &hm_nnz, &hm_nnz_init, h_col, h_row);
         } else {
             CUTEST_ushp(&cutest_status, &opt.n,
-                        &hm_nnz, &hm_nnz_init, h_col, h_row);
+                          &hm_nnz, &hm_nnz_init, h_col, h_row);
         }
         is_diag_entry_present = calloc(opt.n, sizeof(bool));
         num_missing_diagonal = opt.n;
@@ -463,13 +468,13 @@ int MAINENTRY() {
 
 
 void UserF(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-           doublereal *g_val_dummy) {
+           rp_ *g_val_dummy) {
     const logical evaluate_gradient = FALSE_;
     integer cutest_status;
 
     if (opt->m > 0) {
         CUTEST_cofg(&cutest_status, &opt->n, opt->X, &opt->F, g_val_dummy,
-                    &evaluate_gradient);
+                      &evaluate_gradient);
     } else {
         CUTEST_ufn(&cutest_status, &opt->n, opt->X, &opt->F);
     }
@@ -481,13 +486,13 @@ void UserF(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
 }
 
 void UserG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-           doublereal *j_val, integer *j_var, integer *j_fun) {
+           rp_ *j_val, integer *j_var, integer *j_fun) {
     const logical evaluate_jacobian = FALSE_;
     const integer cutest_m = opt->m;
     integer cutest_status, nnzj, nnzjN;
 
     CUTEST_ccfsg(&cutest_status, &opt->n, &cutest_m, opt->X, opt->G,
-                 &nnzjN, &nnzj, j_val, j_var, j_fun, &evaluate_jacobian);
+                   &nnzjN, &nnzj, j_val, j_var, j_fun, &evaluate_jacobian);
     if (cutest_status != 0) {
         WorhpError("Error evaluating constraint functions.", "CUTEst",
                    par->NLPprint);
@@ -508,15 +513,15 @@ void UserF_G(OptVar *opt, Workspace *wsp, Params *par, Control *cnt) {
 }
 
 void UserDF(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-            doublereal *g_val, integer *g_var) {
+            rp_ *g_val, integer *g_var) {
     const logical evaluate_gradient = TRUE_;
     integer cutest_status;
-    doublereal f_dummy;
+    rp_ f_dummy;
     int i, g_nnz;
 
     if (opt->m > 0) {
         CUTEST_cofsg(&cutest_status, &opt->n, opt->X, &f_dummy,
-                     &g_nnz, &wsp->DF.nnz, g_val, g_var, &evaluate_gradient);
+                       &g_nnz, &wsp->DF.nnz, g_val, g_var, &evaluate_gradient);
         assert(g_nnz == wsp->DF.nnz);
         for (i = 0; i < wsp->DF.nnz; i += 1) {
             assert(wsp->DF.row[i] == g_var[wsp->DF.perm[i] - 1]);
@@ -536,8 +541,8 @@ void UserDF(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
 }
 
 void UserDG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-            doublereal *j_val, integer *j_var, integer *j_fun,
-            doublereal *c_dummy) {
+            rp_ *j_val, integer *j_var, integer *j_fun,
+            rp_ *c_dummy) {
     const logical evaluate_jacobian = TRUE_;
     const integer cutest_m = opt->m;
     integer cutest_status, allocated_nnz, written_nnz;
@@ -545,8 +550,8 @@ void UserDG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
 
     allocated_nnz = wsp->DG.nnz + opt->n;
     CUTEST_ccfsg(&cutest_status, &opt->n, &cutest_m, opt->X, c_dummy,
-                 &written_nnz, &allocated_nnz, j_val, j_var, j_fun,
-                 &evaluate_jacobian);
+                   &written_nnz, &allocated_nnz, j_val, j_var, j_fun,
+                   &evaluate_jacobian);
     if (cutest_status != 0) {
         WorhpError("Failed to evaluate DG.", "CUTEST_ccfsg", par->NLPprint);
     }
@@ -560,7 +565,7 @@ void UserDG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
 }
 
 void UserDF_DG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-               doublereal *j_val, integer *j_var, integer *j_fun) {
+               rp_ *j_val, integer *j_var, integer *j_fun) {
     const logical gradient_of_lagrangian = FALSE_;
     const integer objective_part = 0;
     const integer cutest_m = opt->m;
@@ -571,8 +576,8 @@ void UserDF_DG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
     assert(opt->m > 0);
     allocated_nnz = wsp->DG.nnz + opt->n;
     CUTEST_csgr(&cutest_status, &opt->n, &cutest_m, opt->X, opt->Mu,
-                &gradient_of_lagrangian, &written_nnz, &allocated_nnz,
-                j_val, j_var, j_fun);
+                  &gradient_of_lagrangian, &written_nnz, &allocated_nnz,
+                  j_val, j_var, j_fun);
     if (cutest_status != 0) {
         WorhpError("Failed to evaluate DF and DG simultaneously.",
                    "CUTEST_csgr", par->NLPprint);
@@ -603,7 +608,7 @@ void UserDF_DG(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
 }
 
 void UserHM(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
-            doublereal *h_val, integer *h_row, integer *h_col,
+            rp_ *h_val, integer *h_row, integer *h_col,
             integer hm_nnz, integer hm_nnz_init, integer *hm_perm_inverse) {
     const integer objective_part = 0;
     const integer cutest_m = opt->m;
@@ -620,7 +625,7 @@ void UserHM(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
                     &hm_nnz, &hm_nnz_init, h_val, h_col, h_row);
     } else {
         CUTEST_ush(&cutest_status, &opt->n, opt->X, &hm_nnz, &hm_nnz_init,
-                   h_val, h_col, h_row);
+                     h_val, h_col, h_row);
     }
 
     for (i = 0; i < hm_nnz; i += 1) {
@@ -632,7 +637,7 @@ void UserHM(OptVar *opt, Workspace *wsp, Params *par, Control *cnt,
     if (opt->m > 0) {
         /* Evaluate G-Part of hessian of the lagrangian */
         CUTEST_cshc(&cutest_status, &opt->n, &cutest_m, opt->X, opt->Mu,
-                    &hm_nnz, &hm_nnz_init, h_val, h_col, h_row);
+                      &hm_nnz, &hm_nnz_init, h_val, h_col, h_row);
         for (i = 0; i < hm_nnz; i += 1) {
             assert(wsp->HM.row[hm_perm_inverse[i]] == h_row[i]);
             assert(wsp->HM.col[hm_perm_inverse[i]] == h_col[i]);

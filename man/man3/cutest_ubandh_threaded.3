@@ -6,6 +6,19 @@ from the Hessian matrix.
 .SH SYNOPSIS
 .HP 1i
 CALL CUTEST_ubandh_threaded( status, n, X, nsemib, BANDH, lbandh, maxsbw, thread )
+
+.HP 1i
+For real rather than double precision arguments, instead
+
+.HP 1i
+CALL CUTEST_ubandh_threaded_s( ... )
+
+.HP 1i
+and for quadruple precision arguments, when available,
+
+.HP 1i
+CALL CUTEST_ubandh_threaded_q( ... )
+
 .SH DESCRIPTION
 The CUTEST_ubandh_threaded subroutine extracts the elements which lie within 
 a band of given semi-bandwidth out of the Hessian matrix of the objective

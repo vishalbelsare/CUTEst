@@ -5,6 +5,19 @@ CUTEST_cigr_threaded \- CUTEst tool to evaluate the gradient of a problem functi
 .SH SYNOPSIS
 .HP 1i
 CALL CUTEST_cigr_threaded( status, n, iprob, X, G_val, thread )
+
+.HP 1i
+For real rather than double precision arguments, instead
+
+.HP 1i
+CALL CUTEST_cigr_threaded_s( ... )
+
+.HP 1i
+and for quadruple precision arguments, when available,
+
+.HP 1i
+CALL CUTEST_cigr_threaded_q( ... )
+
 .SH DESCRIPTION
 The CUTEST_cigr_threaded subroutine evaluates the gradient of either the
 objective function or a constraint function

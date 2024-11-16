@@ -1,3 +1,4 @@
+/* THIS VERSION: CUTEST 2.3 - 2024-10-11 AT 09:00 GMT */
 
 /* Generic C solver, to be used with
  * generic C driver, gencma.c
@@ -10,12 +11,12 @@ extern "C" {   /* To prevent C++ compilers from mangling symbols */
 #endif
 
 #include "cutest.h"
+#include "cutest_routines.h"
 
-doublereal genc( doublereal dummy )
+rp_ genc( rp_ dummy )
 {
 
-    printf( "\n\tThis is the generic C solver" );
-    printf( "\n\thooked to CUTEst." );
+    printf( "\n\tThis is the generic C solver hooked to CUTEst." );
     printf( "\n\tThe magic number is 41.9999995555555\n" );
     return 41.9999995555555;
 
@@ -44,8 +45,8 @@ void genspc( integer funit, char *fname )
 
 }
 
-void getinfo( integer n, integer m, doublereal *bl, doublereal *bu,
-              doublereal *cl, doublereal *cu, logical *equatn,
+void getinfo( integer n, integer m, rp_ *bl, rp_ *bu,
+              rp_ *cl, rp_ *cu, logical *equatn,
               logical *linear, VarTypes *vartypes )
 {
 

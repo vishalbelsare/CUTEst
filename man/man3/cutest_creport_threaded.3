@@ -1,11 +1,24 @@
 '\" e  @(#)cutest_report v1.0 12/2012;
-.TH cutest_creport_threaded 3 "31 Dec 2012" "CUTEst user documentation" "CUTEst user documentation"
+.TH cutest_creport_threaded 3 "15 Aug 2024" "CUTEst user documentation" "CUTEst user documentation"
 .SH NAME
 CUTEST_creport_threaded \- CUTEst tool to obtain statistics concerning function
 evaluation and CPU time used.
 .SH SYNOPSIS
 .HP 1i
 CALL CUTEST_creport_threaded( status, CALLS, TIME, thread )
+
+.HP 1i
+For real rather than double precision arguments, instead
+
+.HP 1i
+CALL CUTEST_creport_threaded_s( ... )
+
+.HP 1i
+and for quadruple precision arguments, when available,
+
+.HP 1i
+CALL CUTEST_creport_threaded_q( ... )
+
 .SH DESCRIPTION
 The CUTEST_creport_threaded subroutine obtains statistics concerning function
 evaluation and CPU

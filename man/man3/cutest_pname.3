@@ -1,11 +1,24 @@
 '\" e  @(#)cutest_pname v1.1 04/2014;
-.TH cutest_udimen 3M "3 Apr 2014" "CUTEst user documentation" "CUTEst user documentation"
+.TH cutest_pname 3M "3 Apr 2014" "CUTEst user documentation" "CUTEst user documentation"
 .SH NAME
 CUTEST_pname \- CUTEst tool to obtain the name of the problem directly
 from OUTSDIF.d.
 .SH SYNOPSIS
 .HP 1i
 CALL CUTEST_pname( status, input, pname )
+
+.HP 1i
+For real rather than double precision arguments, instead
+
+.HP 1i
+CALL CUTEST_pname_s( ... )
+
+.HP 1i
+and for quadruple precision arguments, when available,
+
+.HP 1i
+CALL CUTEST_pname_q( ... )
+
 .SH DESCRIPTION
 The CUTEST_pname subroutine obtains the name of the problem directly
 from the datafile OUTSDIF.d that was created by the script \fIsifdecoder\fP 

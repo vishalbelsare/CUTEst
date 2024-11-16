@@ -5,6 +5,19 @@ CUTEST_varnames \- CUTEst tool to obtain the names of the problem variables.
 .SH SYNOPSIS
 .HP 1i
 CALL CUTEST_varnames( status, n, VNAME )
+
+.HP 1i
+For real rather than double precision arguments, instead
+
+.HP 1i
+CALL CUTEST_varnames_s( ... )
+
+.HP 1i
+and for quadruple precision arguments, when available,
+
+.HP 1i
+CALL CUTEST_varnames_q( ... )
+
 .SH DESCRIPTION
 The CUTEST_varnames subroutine obtains the names of the problem variables.
 

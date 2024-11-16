@@ -1,76 +1,28 @@
 #  Main body of the installation makefile for CUTEST test programs
 
-#  N. Gould, D. Orban and Ph. L. Toint.
-#  This version: 19 XI 2012
+#  Nick Gould, for GALAHAD productions
+#  This version: 2024-01-18
 
-#  package
+#  include standard CUTEst makefile defaults before package-specifics
+
+include $(CUTEST)/src/makedefs/defaults
+
+#  ===========================================================================
+#  ====================  package-dependent parts  ============================
+#  ===========================================================================
+
+#  package name
 
 PACKAGE = TEST
 package = test
 
-SHELL = /bin/$(BINSHELL)
+#  ===========================================================================
+#  =================  end of package-dependent parts  ========================
+#  ===========================================================================
 
-#  compiler flags
+#  include standard CUTEst makefile definitions
 
-FFLAGS    = $(BASIC) $(OPTIMIZATION) $(DEBUG) $(MODULES) $(F90) $(USUAL)
-FFLAGSS   = $(BASIC) $(OPTIMIZATION) $(DEBUG) $(MODULES) $(F90) $(SPECIAL)
-FFLAGSN   = $(BASIC) $(NOOPTIMIZATION) $(DEBUG) $(MODULES) $(F90)
-FFLAGS77  = $(BASIC) $(OPTIMIZATION) $(DEBUG) $(MODULES) $(F77) $(USUAL)
-FFLAGS77S = $(BASIC) $(OPTIMIZATION) $(DEBUG) $(MODULES) $(F77) $(SPECIAL)
-FFLAGS7N  = $(BASIC) $(NOOPTIMIZATION) $(DEBUG) $(MODULES) $(F77) $(USUAL)
-RUNFFLAGS =          $(OPTIMIZATION) $(DEBUG) $(MODULES)
-
-#  names of random libraries
-
-LC  = $(OBJ)/libcutest.a
-LCS = $(OBJS)/libcutest.a
-LCD = $(OBJD)/libcutest.a
-
-BLC  = $(OBJ)/libcutest_blas.a
-BLCS = $(OBJS)/libcutest_blas.a
-BLCD = $(OBJD)/libcutest_blas.a
-
-DLC  = $(OBJ)/libcutest_dummy.a
-DLCS = $(OBJS)/libcutest_dummy.a
-DLCD = $(OBJD)/libcutest_dummy.a
-
-LLC  = $(OBJ)/libcutest_lapack.a
-LLCS = $(OBJS)/libcutest_lapack.a
-LLCD = $(OBJD)/libcutest_lapack.a
-
-#  Libraries used
-
-#LIBS = -lcutest -lcutest_lapack -lcutest_blas
-LIBS = -lcutest
-PLIBS = $(LIBS) -lcutest_problem
-
-#  Archive manipulation strings
-
-ARR = $(AR) $(ARREPFLAGS) $(LC)
-RMARFILE = $(CUTEST)/bin/rmarfile $(AR) $(GREP) $(LC)
-RMOBFILE = $(CUTEST)/bin/rmobfile $(RM) $(OBJ)
-
-BARR = $(AR) $(ARREPFLAGS) $(BLC)
-BRMARFILE = $(CUTEST)/bin/rmarfile $(AR) $(GREP) $(BLC)
-
-DARR = $(AR) $(ARREPFLAGS) $(DLC)
-
-LARR = $(AR) $(ARREPFLAGS) $(LLC)
-LRMARFILE = $(CUTEST)/bin/rmarfile $(AR) $(GREP) $(LLC)
-
-#  sed scripts
-
-CSEDS = $(CUTEST)/seds/cutersize.sed
-
-#  compilation agenda
-
-#U_TEST = $(OBJ)/u_elfun.o $(OBJ)/u_group.o $(OBJ)/u_range.o $(OBJ)/u_exter.o
-#C_TEST = $(OBJ)/c_elfun.o $(OBJ)/c_group.o $(OBJ)/c_range.o $(OBJ)/c_exter.o
-U_TEST = $(OBJ)/u_elfun.o $(OBJ)/u_group.o $(OBJ)/u_range.o
-C_TEST = $(OBJ)/c_elfun.o $(OBJ)/c_group.o $(OBJ)/c_range.o
-Q_TEST = $(OBJ)/q_elfun.o $(OBJ)/q_group.o $(OBJ)/q_range.o
-
-SUCC = precision version) compiled successfully
+include $(CUTEST)/src/makedefs/definitions
 
 #  main compilations and runs
 
@@ -80,64 +32,97 @@ all: $(package)
 
 $(package): $(package)_$(PRECIS)
 	@printf ' %-21s\n' "CUTEst: $(package) ($(PRECIS) $(SUCC)"
-$(package)_single: $(OBJ)/$(package)_main.o
-$(package)_double: $(OBJ)/$(package)_main.o
+$(package)_single: $(OBJS)/$(package)_main.o
+$(package)_double: $(OBJD)/$(package)_main.o
+$(package)_quadruple: $(OBJQ)/$(package)_main.o
+#$(package)_quadruple: 
+#	@echo " currently no test programs for $(PRECIS)"
+$(package)_single_64: $(OBJS64)/$(package)_main.o
+$(package)_double_64: $(OBJD64)/$(package)_main.o
+$(package)_quadruple_64: 
+	@echo " currently no test programs for $(PRECIS)"
 
 test_cutest: test_cutest_$(PRECIS)
 	@printf ' %-21s\n' "CUTEST: tests ($(PRECIS) $(SUCC)"
-
 test_cutest_single: test_cutest_unconstrained_single \
                     test_cutest_constrained_single
-
 test_cutest_double: test_cutest_unconstrained_double \
                     test_cutest_constrained_double
+test_cutest_quadruple: test_cutest_unconstrained_quadruple \
+                       test_cutest_constrained_quadruple
+test_cutest_single_64: test_cutest_unconstrained_single_64 \
+                       test_cutest_constrained_single_64
+test_cutest_double_64: test_cutest_unconstrained_double_64 \
+                       test_cutest_constrained_double_64
+test_cutest_quadruple_64: test_cutest_unconstrained_quadruple_64 \
+                          test_cutest_constrained_quadruple_64
 
 test_cutest_unconstrained: test_cutest_unconstrained_$(PRECIS)
 	@printf ' %-21s\n' "CUTEST: unconstrained tests ($(PRECIS) $(SUCC)"
-
 test_cutest_unconstrained_single: $(U_TEST)
-
 test_cutest_unconstrained_double: $(U_TEST)
+test_cutest_unconstrained_quadruple: $(U_TEST)
+test_cutest_unconstrained_single_64: $(U_TEST)
+test_cutest_unconstrained_double_64: $(U_TEST)
+test_cutest_unconstrained_quadruple_64: $(U_TEST)
 
 test_cutest_constrained: test_cutest_constrained_$(PRECIS)
 	@printf ' %-21s\n' "CUTEST: constrained tests ($(PRECIS) $(SUCC)"
-
 test_cutest_constrained_single: $(C_TEST)
-
 test_cutest_constrained_double: $(C_TEST)
+test_cutest_constrained_quadruple: $(C_TEST)
 
 test_cutest_quadratic: test_cutest_quadratic_$(PRECIS)
 	@printf ' %-21s\n' "CUTEST: quadratic tests ($(PRECIS) $(SUCC)"
-
 test_cutest_quadratic_single: $(Q_TEST)
-
 test_cutest_quadratic_double: $(Q_TEST)
+test_cutest_quadratic_quadruple: $(Q_TEST)
+test_cutest_quadratic_single_64: $(Q_TEST)
+test_cutest_quadratic_double_64: $(Q_TEST)
+test_cutest_quadratic_quadruple_64: $(Q_TEST)
 
 # run example tests
 
 run_test_cutest: run_test_cutest_unconstrained run_test_cutest_constrained
-run_test_threaded_cutest: run_test_cutest_threaded_unconstrained run_test_cutest_threaded_constrained
+run_test_threaded_cutest: run_test_cutest_threaded_unconstrained \
+                          run_test_cutest_threaded_constrained
 
 run_test_cutest_unconstrained: utools test_cutest_unconstrained
 	echo " Exhaustive test of unconstrained tools"
-	$(SED) -f $(SEDS) ../test/utest.f90 > $(OBJ)/utest.f90
-#	echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-#            $(U_TEST) utest.f90 -L$(OBJ) $(LIBS)"
+	$(CP) ../test/utest.F90 $(OBJ)/utest.F90
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(U_TEST) utest.f90 -L$(OBJ) $(LIBS)
-#	- $(OBJ)/run_test
+            $(U_TEST) utest.F90 -L$(OBJ) $(LIBS)
 	- $(OBJ)/run_test >& ../test/test_unc.output
 	cat ../test/test_unc.output
 	rm $(OBJ)/run_test
 
 run_test_cutest_constrained: ctools test_cutest_constrained
 	echo " Exhaustive test of constrained tools"
-	$(SED) -f $(SEDS) ../test/ctest.f90 > $(OBJ)/ctest.f90
+	$(CP) ../test/ctest.F90 $(OBJ)/ctest.F90
 	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(C_TEST) ctest.f90 -L$(OBJ) $(LIBS)"
+            $(C_TEST) ctest.F90 -L$(OBJ) $(LIBS)"
+#	cd $(OBJ) ; $(FORTRAN) -cpp -dI -DCUTEST_DOUBLE \
+#          -I $(CUTEST)/include ctest.F90
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(C_TEST) ctest.f90 -L$(OBJ) $(LIBS)
-#	valgrind -v --tool=memcheck --leak-check=yes --show-reachable=yes --track-origins=yes $(OBJ)/run_test
+            $(C_TEST) ctest.F90 -L$(OBJ) $(LIBS)
+#	valgrind -v --tool=memcheck --leak-check=yes \
+#         --show-reachable=yes --track-origins=yes $(OBJ)/run_test
+#	- $(OBJ)/run_test
+	- $(OBJ)/run_test >& ../test/test_con.output
+	cat ../test/test_con.output
+	rm $(OBJ)/run_test
+
+run_test_cutest_constrained2: ctools test_cutest_constrained
+	echo " Exhaustive test of constrained tools"
+	$(CP) ../test/ctest2.F90 $(OBJ)/ctest2.F90
+	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
+            $(C_TEST) ctest2.F90 -L$(OBJ) $(LIBS)"
+#	cd $(OBJ) ; $(FORTRAN) -cpp -dI -DCUTEST_DOUBLE \
+#          -I $(CUTEST)/include ctest2.F90
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
+            $(C_TEST) ctest2.F90 -L$(OBJ) $(LIBS)
+#	valgrind -v --tool=memcheck --leak-check=yes \
+#         --show-reachable=yes --track-origins=yes $(OBJ)/run_test
 #	- $(OBJ)/run_test
 	- $(OBJ)/run_test >& ../test/test_con.output
 	cat ../test/test_con.output
@@ -145,81 +130,196 @@ run_test_cutest_constrained: ctools test_cutest_constrained
 
 run_test_cutest_threaded_unconstrained: utools test_cutest_unconstrained
 	echo " Exhaustive test of unconstrained threaded tools"
-	$(SED) -f $(SEDS) ../test/utest_threaded.f90 > $(OBJ)/utest_threaded.f90
+	$(CP) ../test/utest_threaded.F90 $(OBJ)/utest_threaded.F90
 #	echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-#            $(U_TEST) utest_threaded.f90 -L$(OBJ) $(LIBS)"
+#            $(U_TEST) utest_threaded.F90 -L$(OBJ) $(LIBS)"
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(U_TEST) utest_threaded.f90 -L$(OBJ) $(LIBS)
-#	- $(OBJ)/run_test
+            $(U_TEST) utest_threaded.F90 -L$(OBJ) $(LIBS)
 	- $(OBJ)/run_test >& ../test/test_unc_threaded.output
 	cat ../test/test_unc_threaded.output
 	rm $(OBJ)/run_test
 
 run_test_cutest_threaded_constrained: ctools test_cutest_constrained
 	echo " Exhaustive test of constrained threaded tools"
-	$(SED) -f $(SEDS) ../test/ctest_threaded.f90 > $(OBJ)/ctest_threaded.f90
-	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(C_TEST) ctest_threaded.f90 -L$(OBJ) $(LIBS)"
+	$(CP) ../test/ctest_threaded.F90 $(OBJ)/ctest_threaded.F90
+#	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
+#            $(C_TEST) ctest_threaded.F90 -L$(OBJ) $(LIBS)"
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(C_TEST) ctest_threaded.f90 -L$(OBJ) $(LIBS)
-#	- $(OBJ)/run_test
+            $(C_TEST) ctest_threaded.F90 -L$(OBJ) $(LIBS)
 	- $(OBJ)/run_test >& ../test/test_con_threaded.output
 	cat ../test/test_con_threaded.output
 	rm $(OBJ)/run_test
 
-run_test_cuter_unconstrained: test_cutest_unconstrained
-	echo " Exhaustive test of ** CUTEr ** unconstrained tools"
-	$(SED) -f $(SEDS) ../test/ucutertest.f90 > $(OBJ)/ucutertest.f90
-	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(U_TEST) ucutertest.f90 -L$(CUTERUSED)/double/lib -lcuter -lblas
-#	- $(OBJ)/run_test
-	- $(OBJ)/run_test >& ../test/test_unc_cuter.output
-	cat ../test/test_unc_cuter.output
-	rm $(OBJ)/run_test
-
-run_test_cuter_constrained: test_cutest_constrained
-	echo " Exhaustive test of ** CUTEr ** constrained tools"
-	$(SED) -f $(SEDS) ../test/ccutertest.f90 > $(OBJ)/ccutertest.f90
-	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(U_TEST) ccutertest.f90 -L$(CUTERUSED)/double/lib -lcuter -lblas
-#	- $(OBJ)/run_test
-	- $(OBJ)/run_test >& ../test/test_con_cuter.output
-	cat ../test/test_con_cuter.output
-	rm $(OBJ)/run_test
-
 run_test_cutest_constrained_debug: ctools test_cutest_constrained
 	echo " Exhaustive test of constrained tools"
-	$(SED) -f $(SEDS) ../test/ctest_debug.f90 > $(OBJ)/ctest_debug.f90
-	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(C_TEST) ctest_debug.f90 -L$(OBJ) $(LIBS)"
+	$(CP) ../test/ctest_debug.F90 $(OBJ)/ctest_debug.F90
+#	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
+#            $(C_TEST) ctest_debug.F90 -L$(OBJ) $(LIBS)"
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(C_TEST) ctest_debug.f90 -L$(OBJ) $(LIBS)
+            $(C_TEST) ctest_debug.F90 -L$(OBJ) $(LIBS)
 	- $(OBJ)/run_test
 #	- $(OBJ)/run_test >& ../test/test_con.output
 #	cat ../test/test_con.output
-	rm $(OBJ)/run_test $(OBJ)/ctest_debug.f90
+	rm $(OBJ)/run_test $(OBJ)/ctest_debug.F90
 
 run_lqp_test: ctools test_cutest_quadratic
 	echo " Exhaustive test of constrained tools"
-	$(SED) -f $(SEDS) ../test/lqptest.f90 > $(OBJ)/lqptest.f90
-	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(Q_TEST) lqptest.f90 -L$(OBJ) $(LIBS)"
+	$(CP) ../test/lqptest.F90 $(OBJ)/lqptest.F90
+#	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
+#            $(Q_TEST) lqptest.F90 -L$(OBJ) $(LIBS)"
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_test \
-            $(Q_TEST) lqptest.f90 -L$(OBJ) $(LIBS)
-#	- $(OBJ)/run_test
+            $(Q_TEST) lqptest.F90 -L$(OBJ) $(LIBS)
 	- $(OBJ)/run_test >& ../test/test_lqp.output
 	cat ../test/test_lqp.output
 	rm $(OBJ)/run_test
 
 run_debug_cutest_constrained: ctools test_cutest_constrained
 	echo " Exhaustive debug of constrained tools"
-	$(SED) -f $(SEDS) ../test/cdebug.f90 > $(OBJ)/cdebug.f90
+	$(CP) ../test/cdebug.F90 $(OBJ)/cdebug.F90
 	cd $(OBJ) ; echo "$(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_debug \
-            $(C_TEST) cdebug.f90 -L$(OBJ) $(LIBS)"
+            $(C_TEST) cdebug.F90 -L$(OBJ) $(LIBS)"
 	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_debug \
-            $(C_TEST) cdebug.f90 -L$(OBJ) $(LIBS)
+            $(C_TEST) cdebug.F90 -L$(OBJ) $(LIBS)
 	- $(OBJ)/run_debug
 	rm $(OBJ)/run_debug
+
+run_c_test_cutest_unconstrained: utools test_cutest_unconstrained
+	echo " Exhaustive test of unconstrained C tools"
+	$(CP) ../test/utest.c $(OBJ)/utest.c
+	cd $(OBJ) ; $(CC) -o utest.o $(CFLAGS) utest.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(U_TEST) utest.o -L$(OBJ) $(LIBS)
+	- $(OBJ)/run_c_test >& ../test/c_test_unc.output
+	cat ../test/c_test_unc.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_cutest_unconstrained_sanitize: ctools test_cutest_unconstrained
+	echo " Exhaustive test of unconstrained C tools"
+	$(CP) ../test/utest.c $(OBJ)/utest.c
+	cd $(OBJ) ; $(CC) -o utest.o $(CFLAGS) -fsanitize=address -g utest.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) utest.o -L$(OBJ) $(LIBS) \
+            -fsanitize=address -static-libasan
+	- $(OBJ)/run_c_test
+#	- $(OBJ)/run_c_test >& ../test/c_test_unc.output
+#	cat ../test/c_test_unc.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_cutest_unconstrained_valgrind: ctools test_cutest_unconstrained
+	echo " Exhaustive test of unconstrained C tools"
+	$(CP) ../test/utest.c $(OBJ)/utest.c
+	cd $(OBJ) ; $(CC) -o utest.o $(CFLAGS) -g utest.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) utest.o -L$(OBJ) $(LIBS)
+	- valgrind $(VALGRIND) $(OBJ)/run_c_test
+#	- valgrind $(VALGRIND) $(OBJ)/run_c_test >& \
+#            ../test/c_test_unc_valgrind.output
+#	cat ../test/c_test_unc_valgrind.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_cutest_constrained: ctools test_cutest_constrained
+	echo " Exhaustive test of constrained C tools"
+	$(CP) ../test/ctest.c $(OBJ)/ctest.c
+	cd $(OBJ) ; $(CC) -o ctest.o $(CFLAGS) ctest.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) ctest.o -L$(OBJ) $(LIBS)
+	- $(OBJ)/run_c_test >& ../test/c_test_con.output
+	cat ../test/c_test_con.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_cutest_constrained_sanitize: ctools test_cutest_constrained
+	echo " Exhaustive test of constrained C tools"
+	$(CP) ../test/ctest.c $(OBJ)/ctest.c
+	cd $(OBJ) ; $(CC) -o ctest.o $(CFLAGS) -fsanitize=address -g ctest.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) ctest.o -L$(OBJ) $(LIBS) \
+            -fsanitize=address -static-libasan
+	- $(OBJ)/run_c_test
+#	- $(OBJ)/run_c_test >& ../test/c_test_con.output
+#	cat ../test/c_test_con.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_cutest_constrained_valgrind: ctools test_cutest_constrained
+	echo " Exhaustive test of constrained C tools"
+	$(CP) ../test/ctest.c $(OBJ)/ctest.c
+	cd $(OBJ) ; $(CC) -o ctest.o $(CFLAGS) -g ctest.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) ctest.o -L$(OBJ) $(LIBS)
+	- valgrind $(VALGRIND) $(OBJ)/run_c_test
+#	- valgrind $(VALGRIND) $(OBJ)/run_c_test >& \
+#            ../test/c_test_con_valgrind.output
+#	cat ../test/c_test_con_valgrind.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_c_cutest_unconstrained: utools test_cutest_unconstrained
+	echo " Exhaustive test of 0-based unconstrained C tools"
+	$(CP) ../test/utest_c.c $(OBJ)/utest_c.c
+	cd $(OBJ) ; $(CC) -o utest_c.o $(CFLAGS) utest_c.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(U_TEST) utest_c.o -L$(OBJ) $(LIBS)
+	- $(OBJ)/run_c_test >& ../test/c_test_c_unc.output
+	cat ../test/c_test_c_unc.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_c_cutest_unconstrained_sanitize: utools test_cutest_unconstrained
+	echo " Exhaustive test of 0-based unconstrained C tools"
+	$(CP) ../test/utest_c.c $(OBJ)/utest_c.c
+	cd $(OBJ) ; $(CC) -o utest_c.o $(CFLAGS) -fsanitize=address \
+                      -g utest_c.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) utest_c.o -L$(OBJ) $(LIBS) \
+            -fsanitize=address -static-libasan
+	- $(OBJ)/run_c_test
+#	- $(OBJ)/run_c_test >& ../test/c_test_c_unc.output
+#	cat ../test/c_test_c_unc.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_c_cutest_unconstrained_valgrind: utools test_cutest_unconstrained
+	echo " Exhaustive test of 0-based unconstrained C tools"
+	$(CP) ../test/utest_c.c $(OBJ)/utest_c.c
+	cd $(OBJ) ; $(CC) -o utest_c.o $(CFLAGS) utest_c.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) utest_c.o -L$(OBJ) $(LIBS)
+	- valgrind $(VALGRIND) $(OBJ)/run_c_test
+#	- valgrind $(VALGRIND) $(OBJ)/run_c_test >& \
+#            ../test/c_test_c_unc_valgrind.output
+#	cat ../test/c_test_c_unc_valgrind.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_c_cutest_constrained: ctools test_cutest_constrained
+	echo " Exhaustive test of 0-based constrained C tools"
+	$(CP) ../test/ctest_c.c $(OBJ)/ctest_c.c
+	cd $(OBJ) ; $(CC) -o ctest_c.o $(CFLAGS) ctest_c.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) ctest_c.o -L$(OBJ) $(LIBS)
+	- $(OBJ)/run_c_test >& ../test/c_test_c_con.output
+	cat ../test/c_test_c_con.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_c_cutest_constrained_sanitize: ctools test_cutest_constrained
+	echo " Exhaustive test of 0-based constrained C tools"
+	$(CP) ../test/ctest_c.c $(OBJ)/ctest_c.c
+	cd $(OBJ) ; $(CC) -o ctest_c.o $(CFLAGS) -fsanitize=address \
+                      -g ctest_c.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) ctest_c.o -L$(OBJ) $(LIBS) \
+            -fsanitize=address -static-libasan
+	- $(OBJ)/run_c_test
+#	- $(OBJ)/run_c_test >& ../test/c_test_c_con.output
+#	cat ../test/c_test_c_con.output
+	rm $(OBJ)/run_c_test
+
+run_c_test_c_cutest_constrained_valgrind: ctools test_cutest_constrained
+	echo " Exhaustive test of 0-based constrained C tools"
+	$(CP) ../test/ctest_c.c $(OBJ)/ctest_c.c
+	cd $(OBJ) ; $(CC) -o ctest_c.o $(CFLAGS) ctest_c.c 
+	cd $(OBJ) ; $(FORTRAN) $(RUNFFLAGS) $(SPECIAL) -o run_c_test \
+            $(NOFMAIN) $(C_TEST) ctest_c.o -L$(OBJ) $(LIBS)
+	- valgrind $(VALGRIND) $(OBJ)/run_c_test
+#	- valgrind $(VALGRIND) $(OBJ)/run_c_test >& \
+#            ../test/c_test_c_con_valgrind.output
+#	cat ../test/c_test_c_con_valgrind.output
+	rm $(OBJ)/run_c_test
 
 tools:
 	( cd ../tools ; $(MAKE) -f $(CUTEST)/makefiles/$(VERSION) \
@@ -233,116 +333,115 @@ ctools:
 
 #  individual compilations
 
-$(OBJ)/u_elfun.o: ../test/u_elfun.f
+$(OBJ)/u_elfun.o: ../test/u_elfun_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "u_elfun"
-	$(SED) -f $(SEDS) ../test/u_elfun.f > $(OBJ)/u_elfun.f
-	cd $(OBJ); $(FORTRAN) -o u_elfun.o $(FFLAGS77) u_elfun.f \
+	$(CP) ../test/u_elfun_$(PRECIS).f $(OBJ)/u_elfun.f
+	cd $(OBJ); $(FORTRAN) -o u_elfun.o $(FFLAGS) u_elfun.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o u_elfun.o $(FFLAGS77N) u_elfun.f )
+                   $(FORTRAN) -o u_elfun.o $(FFLAGSN) u_elfun.f )
 	$(RM) $(OBJ)/u_elfun.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/u_group.o: ../test/u_group.f
+$(OBJ)/u_group.o: ../test/u_group_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "u_group"
-	$(SED) -f $(SEDS) ../test/u_group.f > $(OBJ)/u_group.f
-	cd $(OBJ); $(FORTRAN) -o u_group.o $(FFLAGS77) u_group.f \
+	$(CP) ../test/u_group_$(PRECIS).f $(OBJ)/u_group.f
+	cd $(OBJ); $(FORTRAN) -o u_group.o $(FFLAGS) u_group.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o u_group.o $(FFLAGS77N) u_group.f )
+                   $(FORTRAN) -o u_group.o $(FFLAGSN) u_group.f )
 	$(RM) $(OBJ)/u_group.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/u_range.o: ../test/u_range.f
+$(OBJ)/u_range.o: ../test/u_range_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "u_range"
-	$(SED) -f $(SEDS) ../test/u_range.f > $(OBJ)/u_range.f
-	cd $(OBJ); $(FORTRAN) -o u_range.o $(FFLAGS77) u_range.f \
+	$(CP) ../test/u_range_$(PRECIS).f $(OBJ)/u_range.f
+	cd $(OBJ); $(FORTRAN) -o u_range.o $(FFLAGS) u_range.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o u_range.o $(FFLAGS77N) u_range.f )
+                   $(FORTRAN) -o u_range.o $(FFLAGSN) u_range.f )
 	$(RM) $(OBJ)/u_range.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/u_exter.o: ../test/u_exter.f
+$(OBJ)/u_exter.o: ../test/u_exter_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "u_exter"
-	$(SED) -f $(SEDS) ../test/u_exter.f > $(OBJ)/u_exter.f
-	cd $(OBJ); $(FORTRAN) -o u_exter.o $(FFLAGS77) u_exter.f \
+	$(CP) ../test/u_exter_$(PRECIS).f $(OBJ)/u_exter.f
+	cd $(OBJ); $(FORTRAN) -o u_exter.o $(FFLAGS) u_exter.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o u_exter.o $(FFLAGS77N) u_exter.f )
+                   $(FORTRAN) -o u_exter.o $(FFLAGSN) u_exter.f )
 	$(RM) $(OBJ)/u_exter.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/c_elfun.o: ../test/c_elfun.f
+$(OBJ)/c_elfun.o: ../test/c_elfun_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "c_elfun"
-	$(SED) -f $(SEDS) ../test/c_elfun.f > $(OBJ)/c_elfun.f
-	cd $(OBJ); $(FORTRAN) -o c_elfun.o $(FFLAGS77) c_elfun.f \
+	$(CP) ../test/c_elfun_$(PRECIS).f $(OBJ)/c_elfun.f
+	cd $(OBJ); $(FORTRAN) -o c_elfun.o $(FFLAGS) c_elfun.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o c_elfun.o $(FFLAGS77N) c_elfun.f )
+                   $(FORTRAN) -o c_elfun.o $(FFLAGSN) c_elfun.f )
 	$(RM) $(OBJ)/c_elfun.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/c_group.o: ../test/c_group.f
+$(OBJ)/c_group.o: ../test/c_group_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "c_group"
-	$(SED) -f $(SEDS) ../test/c_group.f > $(OBJ)/c_group.f
-	cd $(OBJ); $(FORTRAN) -o c_group.o $(FFLAGS77) c_group.f \
+	$(CP) ../test/c_group_$(PRECIS).f $(OBJ)/c_group.f
+	cd $(OBJ); $(FORTRAN) -o c_group.o $(FFLAGS) c_group.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o c_group.o $(FFLAGS77N) c_group.f )
+                   $(FORTRAN) -o c_group.o $(FFLAGSN) c_group.f )
 	$(RM) $(OBJ)/c_group.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/c_range.o: ../test/c_range.f
+$(OBJ)/c_range.o: ../test/c_range_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "c_range"
-	$(SED) -f $(SEDS) ../test/c_range.f > $(OBJ)/c_range.f
-	cd $(OBJ); $(FORTRAN) -o c_range.o $(FFLAGS77) c_range.f \
+	$(CP) ../test/c_range_$(PRECIS).f $(OBJ)/c_range.f
+	cd $(OBJ); $(FORTRAN) -o c_range.o $(FFLAGS) c_range.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o c_range.o $(FFLAGS77N) c_range.f )
+                   $(FORTRAN) -o c_range.o $(FFLAGSN) c_range.f )
 	$(RM) $(OBJ)/c_range.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/c_exter.o: ../test/c_exter.f
+$(OBJ)/c_exter.o: ../test/c_exter_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "c_exter"
-	$(SED) -f $(SEDS) ../test/c_exter.f > $(OBJ)/c_exter.f
-	cd $(OBJ); $(FORTRAN) -o c_exter.o $(FFLAGS77) c_exter.f \
+	$(CP) ../test/c_exter_$(PRECIS).f $(OBJ)/c_exter.f
+	cd $(OBJ); $(FORTRAN) -o c_exter.o $(FFLAGS) c_exter.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o c_exter.o $(FFLAGS77N) c_exter.f )
+                   $(FORTRAN) -o c_exter.o $(FFLAGSN) c_exter.f )
 	$(RM) $(OBJ)/c_exter.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/q_elfun.o: ../test/q_elfun.f
+$(OBJ)/q_elfun.o: ../test/q_elfun_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "q_elfun"
-	$(SED) -f $(SEDS) ../test/q_elfun.f > $(OBJ)/q_elfun.f
-	cd $(OBJ); $(FORTRAN) -o q_elfun.o $(FFLAGS77) q_elfun.f \
+	$(CP) ../test/q_elfun_$(PRECIS).f $(OBJ)/q_elfun.f
+	cd $(OBJ); $(FORTRAN) -o q_elfun.o $(FFLAGS) q_elfun.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o q_elfun.o $(FFLAGS77N) q_elfun.f )
+                   $(FORTRAN) -o q_elfun.o $(FFLAGSN) q_elfun.f )
 	$(RM) $(OBJ)/q_elfun.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/q_group.o: ../test/q_group.f
+$(OBJ)/q_group.o: ../test/q_group_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "q_group"
-	$(SED) -f $(SEDS) ../test/q_group.f > $(OBJ)/q_group.f
-	cd $(OBJ); $(FORTRAN) -o q_group.o $(FFLAGS77) q_group.f \
+	$(CP) ../test/q_group_$(PRECIS).f $(OBJ)/q_group.f
+	cd $(OBJ); $(FORTRAN) -o q_group.o $(FFLAGS) q_group.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o q_group.o $(FFLAGS77N) q_group.f )
+                   $(FORTRAN) -o q_group.o $(FFLAGSN) q_group.f )
 	$(RM) $(OBJ)/q_group.f
 	@printf '[ OK ]\n'
 
-$(OBJ)/q_range.o: ../test/q_range.f
+$(OBJ)/q_range.o: ../test/q_range_$(PRECIS).f
 	@printf ' %-9s %-15s\t\t' "Compiling" "q_range"
-	$(SED) -f $(SEDS) ../test/q_range.f > $(OBJ)/q_range.f
-	cd $(OBJ); $(FORTRAN) -o q_range.o $(FFLAGS77) q_range.f \
+	$(CP) ../test/q_range_$(PRECIS).f $(OBJ)/q_range.f
+	cd $(OBJ); $(FORTRAN) -o q_range.o $(FFLAGS) q_range.f \
                 || ( printf ' %-26s' "=> Disabling optimization " ; \
-                   $(FORTRAN) -o q_range.o $(FFLAGS77N) q_range.f )
+                   $(FORTRAN) -o q_range.o $(FFLAGSN) q_range.f )
 	$(RM) $(OBJ)/q_range.f
 	@printf '[ OK ]\n'
 
 #  CUTEst interface main programs
 
-$(OBJ)/$(package)_main.o: ../$(package)/$(package)_main.f90
+$(OBJ)/$(package)_main.o: ../$(package)/$(package)_main.F90
 	@printf ' %-9s %-15s\t\t' "Compiling" "$(package)_main"
-	$(SED) -f $(SEDS) ../$(package)/$(package)_main.f90 > \
-          $(OBJ)/$(package)_main.f90
-	cd $(OBJ); $(FORTRAN) -o $(package)_main.o $(FFLAGS) \
-             $(package)_main.f90 \
+	$(CP) ../$(package)/$(package)_main.F90 $(OBJ)/$(package)_main.F90
+	cd $(OBJ); $(FORTRAN) -o $(package)_main.o $(F90FLAGS) \
+             $(package)_main.F90 \
               || ( printf ' %-26s' "=> Disabling optimization " ; \
-              $(FORTRAN) -o $(package)_main.o $(FFLAGS77N) $(package)_main.f90 )
-	$(RM) $(OBJ)/$(package)_main.f90 $(OBJ)/*.mod
+              $(FORTRAN) -o $(package)_main.o $(F90FLAGSN) $(package)_main.F90 )
+	$(RM) $(OBJ)/$(package)_main.F90 $(OBJ)/*.mod
 	@printf '[ OK ]\n'
 
 #  book keeping
@@ -357,4 +456,3 @@ cleanall:
           "Removing all $(PRECIS) precision object and module files"
 	$(RM) $(OBJ)/* $(MOD)/*
 	@printf '[ OK ]\n'
-
